@@ -61,7 +61,7 @@ def rescale_mask_V2(input_mask: np.array, transform_params: list, original_shape
     
     # Rescale the uncropped mask back to the resolution of the original image.
     uncropped_and_rescaled_mask = mask_scaled.resize((original_image_width, original_image_height), 
-                                                      resample=Image.Resampling.BICUBIC)
+                                                      resample=Image.BICUBIC)
     return uncropped_and_rescaled_mask
 
 

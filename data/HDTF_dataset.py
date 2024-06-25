@@ -56,8 +56,8 @@ class HDTFDataset(Dataset):
         self.closing_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21))
         self.dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 31))
 
-        self.blend_image_ablation = True
-        self.return_coeff_params = True # only return the coeffients not do renderer in dataloader
+        self.blend_image_ablation = False
+        self.return_coeff_params = False # only return the coeffients not do renderer in dataloader
 
     def _build_dataset(self, opt, is_inference):
         def load_data_statistics(fp):

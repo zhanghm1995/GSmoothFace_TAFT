@@ -83,7 +83,8 @@ class HDTFDemoDataset(Dataset):
         self, 
         data_root,
         video_name,
-        pred_dir):
+        pred_dir,
+        pred_dir_file_type="*.mat"):
 
         super(HDTFDemoDataset, self).__init__()
 
@@ -93,10 +94,10 @@ class HDTFDemoDataset(Dataset):
 
         self.image_paths = sorted(glob(osp.join(self.video_dir, "face_image", "*.jpg")))
 
-        self.pred_paths = sorted(glob(osp.join(pred_dir, "*.png")))
+        self.pred_paths = sorted(glob(osp.join(pred_dir, pred_dir_file_type)))
         self.deep3dface_mat_paths = sorted(glob(osp.join(self.video_dir, "deep3dface", "*.mat")))
 
-        self.pred_224_paths = sorted(glob("/home/zhanghm/Temp/cv-fighter/face_fighter/3DMM/paper_PE_val_condition_WDA_KimSchrier_000_001_audio_WRA_KellyAyotte_000/*.png"))
+        # self.pred_224_paths = sorted(glob("/home/zhanghm/Temp/cv-fighter/face_fighter/3DMM/paper_PE_val_condition_WDA_KimSchrier_000_001_audio_WRA_KellyAyotte_000/*.png"))
 
         self.transform = transforms.Compose(
             [
@@ -110,7 +111,7 @@ class HDTFDemoDataset(Dataset):
         self.half_mask[:128, ...] = 255
 
         self.closing_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (21, 21))
-        self.dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 21))
+        self.dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 31))
 
     def __len__(self):
         return len(self.pred_paths)
@@ -157,6 +158,45 @@ class HDTFDemoDataset(Dataset):
         return data
 
     def __getitem__(self, index):
+        pred_3d_face_mat_path = self.pred_paths[index]
+
+        data = {}
+        ## Read the source image and source semantics
+        source_image_path = self.image_paths[index]
+        source_image = Image.open(source_image_path).convert("RGB")
+        source_image = self.transform(source_image)
+        data['source_image'] = source_image
+
+        ref_img_idx = 0
+        ref_img_path = self.image_paths[ref_img_idx]
+        reference_image = Image.open(ref_img_path).convert("RGB")
+        data['reference_image'] = self.transform(reference_image)
+
+        ## Read the predicted 3D face coefficients
+        coeff_3dmm = read_face3dmm_params(pred_3d_face_mat_path, need_crop_params=True)
+        coeff_3dmm = torch.from_numpy(coeff_3dmm) # (1, 260)
+        curr_face3dmm_params = coeff_3dmm[:, :257] # (1, 257)
+        curr_trans_params = coeff_3dmm[:, -3:]
+
+        rendered_image_numpy, mask = self.face_renderer.compute_rendered_face(curr_face3dmm_params, None)
+        # get the rescaled_rendered_image (256, 256, 3)
+        rescaled_rendered_image = rescale_mask_V2(
+            rendered_image_numpy[0], curr_trans_params[0], original_shape=(512, 512))
+        data['rendered_image'] = self.transform(rescaled_rendered_image)
+
+        ## get the rescaled mask image
+        rendered_face_mask_img_tensor = self.get_rescaled_mask(mask, curr_trans_params, mask_augment=True)
+        
+        ## Get the blended face image
+        blended_img_tensor = data['source_image'] * (1 - rendered_face_mask_img_tensor) + \
+                             data['rendered_image'] * rendered_face_mask_img_tensor
+        
+        data['blended_image'] = blended_img_tensor
+        data['masked_image'] = rendered_face_mask_img_tensor.repeat(3, 1, 1)
+        
+        return data
+    
+    def __getitem_old__(self, index):
         pred_3d_face_image_path = self.pred_paths[index]
         deep3dface_mat_path = self.deep3dface_mat_paths[index]
         

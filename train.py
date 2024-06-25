@@ -14,7 +14,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Training')
     parser.add_argument('--config', default='./config/face.yaml')
     parser.add_argument('--name', default=None)
-    parser.add_argument('--checkpoints_dir', default='result',
+    parser.add_argument('--checkpoints_dir', default='work_dir',
                         help='Dir for saving logs and models.')
     parser.add_argument('--seed', type=int, default=0, help='Random seed.')
     parser.add_argument('--which_iter', type=int, default=None)
