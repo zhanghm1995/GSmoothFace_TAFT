@@ -68,7 +68,7 @@ class HDTFDataset(Dataset):
                 ret_dict[entry[0]] = int(entry[1])
             return ret_dict
 
-        if not is_inference:
+        if not is_inference: # train
             self.data_root = osp.join(self.data_root, "train")
 
             ## Get all key frames

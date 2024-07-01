@@ -10,7 +10,7 @@ Description: Load the demo dataset for TalkingFaceFormer.
 import os
 import os.path as osp
 from glob import glob
-import collections
+import random
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
@@ -169,6 +169,7 @@ class HDTFDemoDataset(Dataset):
 
         ref_img_idx = 0
         ref_img_path = self.image_paths[ref_img_idx]
+        # ref_img_path = random.choice(self.image_paths)
         reference_image = Image.open(ref_img_path).convert("RGB")
         data['reference_image'] = self.transform(reference_image)
 

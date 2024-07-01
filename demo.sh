@@ -18,8 +18,9 @@ set -x
 # --single_gpu
 
 python demo.py \
---config ./config/face_to_face_HDTF_demo.yaml \
---name HDTF_face_to_face_no_adain_mask_augment \
+--config ./config/face_to_face_HDTF.yaml \
+--name GSmoothFace_TAFT \
+--checkpoints_dir work_dir \
 --no_resume \
---output_dir ./demo/HDTF_face_to_face_no_adain_mask_augment/test_WDA_KimSchrier_000_singing \
+--output_dir ./work_dir/demo/WDA_KimSchrier_000_000_audio_RD_Radio34_002 \
 --single_gpu

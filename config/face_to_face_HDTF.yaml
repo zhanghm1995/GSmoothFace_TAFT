@@ -96,4 +96,4 @@ hdtf_data_demo:
   # video_name: WDA_JeanneShaheen0_000
   # the deep3dface coeffcients directory path
   # pred_dir: /home/zhanghm/Research/Face/PIRender/WDA_JeanneShaheen0_000_condition_WDA_ChrisMurphy0_000
-  pred_dir: /home/zhanghm/Research/V100/TalkingFaceFormer/test_dir/paper_PE_val_condition_WDA_KimSchrier_000_001_audio_WRA_KellyAyotte_000
+  pred_dir: results/demo/WDA_KimSchrier_000_000_audio_RD_Radio34_002
